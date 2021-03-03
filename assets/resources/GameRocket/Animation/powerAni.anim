@@ -1,0 +1,33 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "powerAni",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.05,
+  "sample": 60,
+  "speed": 0.4,
+  "wrapMode": 2,
+  "curveData": {
+    "props": {
+      "y": [
+        {
+          "frame": 0,
+          "value": -130
+        },
+        {
+          "frame": 0.016666666666666666,
+          "value": -110
+        },
+        {
+          "frame": 0.03333333333333333,
+          "value": -130
+        },
+        {
+          "frame": 0.05,
+          "value": -110
+        }
+      ]
+    }
+  },
+  "events": []
+}
