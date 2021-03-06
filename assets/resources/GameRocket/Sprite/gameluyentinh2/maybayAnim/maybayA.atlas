@@ -1,0 +1,55 @@
+
+maybayA.png
+size: 1024,512
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+maybay
+  rotate: true
+  xy: 440, 69
+  size: 137, 147
+  orig: 137, 147
+  offset: 0, 0
+  index: -1
+s1 (1)
+  rotate: false
+  xy: 2, 78
+  size: 436, 405
+  orig: 436, 405
+  offset: 0, 0
+  index: -1
+s1 (2)
+  rotate: false
+  xy: 2, 2
+  size: 86, 74
+  orig: 86, 74
+  offset: 0, 0
+  index: -1
+s1 (3)
+  rotate: false
+  xy: 589, 151
+  size: 16, 55
+  orig: 16, 55
+  offset: 0, 0
+  index: -1
+s1 (4)
+  rotate: false
+  xy: 589, 151
+  size: 16, 55
+  orig: 16, 55
+  offset: 0, 0
+  index: -1
+s1 (5)
+  rotate: false
+  xy: 955, 369
+  size: 33, 114
+  orig: 33, 114
+  offset: 0, 0
+  index: -1
+s1 (6)
+  rotate: true
+  xy: 440, 208
+  size: 275, 513
+  orig: 275, 513
+  offset: 0, 0
+  index: -1

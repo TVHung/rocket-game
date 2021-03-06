@@ -1,0 +1,60 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "planetAni2",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 2.0166666666666666,
+  "sample": 60,
+  "speed": 0.3,
+  "wrapMode": 1,
+  "curveData": {
+    "props": {
+      "position": [
+        {
+          "frame": 0,
+          "value": [
+            291,
+            755
+          ],
+          "motionPath": [
+            [
+              -202,
+              307,
+              -62,
+              622,
+              -414,
+              -168
+            ]
+          ]
+        },
+        {
+          "frame": 2.0166666666666666,
+          "value": [
+            -445,
+            -894
+          ],
+          "motionPath": []
+        }
+      ],
+      "scale": [
+        {
+          "frame": 0,
+          "value": {
+            "__type__": "cc.Vec2",
+            "x": 0.5,
+            "y": 0.5
+          }
+        },
+        {
+          "frame": 2.0166666666666666,
+          "value": {
+            "__type__": "cc.Vec2",
+            "x": 2,
+            "y": 2
+          }
+        }
+      ]
+    }
+  },
+  "events": []
+}

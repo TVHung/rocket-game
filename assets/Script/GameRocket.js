@@ -1,149 +1,450 @@
 cc.Class({
-  extends: cc.Component,
+    extends: cc.Component,
 
-  properties: {
-    rocket: {
-      default: null,
-      type: cc.Node,
+    properties: {
+        rocket: {
+            default: null,
+            type: cc.Node,
+        },
+        questionBox: {
+            default: null,
+            type: cc.Node,
+        },
+        questionText: {
+            default: null,
+            type: cc.Label,
+        },
+        resultTextA: {
+            default: null,
+            type: cc.Label,
+        },
+        resultTextB: {
+            default: null,
+            type: cc.Label,
+        },
+        resultTextC: {
+            default: null,
+            type: cc.Label,
+        },
+        readyLabel: {
+            default: null,
+            type: cc.Label,
+        },
+        background1: {
+            default: null,
+            type: cc.Sprite,
+        },
+        background2: {
+            default: null,
+            type: cc.Sprite,
+        },
+        nofiChangePlanet: {
+            default: null,
+            type: cc.Label,
+        },
+        layerColor: {
+            default: null,
+            type: cc.Node,
+        },
+        planet: {
+            default: null,
+            type: cc.Sprite,
+        },
+        namePlanet: {
+            default: null,
+            type: cc.Label,
+        },
+        planetAtlas: {
+            default: null,
+            type: cc.SpriteAtlas,
+        },
+        starDrop: {
+            default: null,
+            type: cc.Node,
+        },
+        earth: {
+            default: null,
+            type: cc.Sprite,
+        },
+        character: {
+            //nhan vat dong hanh
+            default: null,
+            type: cc.Node,
+        },
+        score: {
+            //diem
+            default: null,
+            type: cc.Label,
+        },
+
+        tableResult: {
+            //bang ket qua
+            default: null,
+            type: cc.Node,
+        },
+        scoreTable: {
+            //bang diem
+            default: null,
+            type: cc.Label,
+        },
+        tableResume: {
+            //bang tam dung
+            default: null,
+            type: cc.Node,
+        },
+
+        _gameStart: false, //state game
+        _numCurrentQuestion: 0, //so cau hoi da tra loi
+        _numTrueQuestion: 0, //so cau tra loi dung hien tai
+        numOfQuestion: 0, //số lượng câu hỏi (input)
+        numOfQuestionNextPlanet: 0, //số lượng câu hỏi thì sẽ đến hành tinh mới
+        _trueResult: 0, //Kết quả đúng
+        _valueLimit: 10, //giới hạn số sẽ được học tới
+        _gravitation: 5000, //trọng lực sẽ quyết định tốc độ rơi nhanh hay chậm
+        _dropRocket: false,
+        _typeFly: false, //change type fly
+        _flyUp: true,
+        _win: false,
+        _gameOver: false,
+        _backgroundWidth: 0, //kich thuoc background
+        _backgroundHeight: 0,
+        _indexPlanet: 1, //thu tu cac hanh tinh se duoc goi
     },
 
-    readyLabel: {
-      default: null,
-      type: cc.Label,
+    start() {
+        setTimeout(() => {
+            // this.node.getComponent("SoundManager").playBackGroundSound();
+        }, 2500);
     },
 
-    countDown: {
-      //dem nguoc
-      default: null,
-      type: cc.Prefab,
+    onLoad() {
+        // cc.director.getCollisionManager().enabledDebugDraw = true;
+        cc.debug.setDisplayStats(false);
+        this.questionBox.active = false;
+        this.nofiChangePlanet.active = false;
+
+        this._backgroundWidth = this.background2.node.getContentSize().width;
+        this._backgroundHeight = this.background2.node.getContentSize().height;
+        this.background1.node.setPosition(0, 0);
+        this.background2.node.setPosition(0, this._backgroundHeight);
+
+        window.width = cc.view._designResolutionSize.width;
+        window.height = cc.view._designResolutionSize.height;
+
+        arrNamePlanet = new Array(); //ten cac hanh tinh
+        this.arrNamePlanet = [
+            "Mặt Trời",
+            "Sao Thủy Tinh",
+            "Sao Môc",
+            "Sao Kim",
+            "Sao Thiên Vương",
+            "Sao Hải Vương",
+            "Sao Hỏa",
+            "Sao Hỏa",
+            "Sao Hỏa",
+            "Sao Hỏa",
+        ];
+        arrPickerColor = new Array(); //mang ma mau
+        this.arrPickerColor = [
+            { r: 255, g: 0, b: 0 },
+            { r: 252, g: 140, b: 3 },
+            { r: 252, g: 240, b: 3 },
+            { r: 152, g: 252, b: 3 },
+            { r: 28, g: 252, b: 3 },
+            { r: 2, g: 252, b: 152 },
+            { r: 3, g: 248, b: 252 },
+            { r: 3, g: 132, b: 252 },
+            { r: 11, g: 3, b: 252 },
+            { r: 177, g: 3, b: 252 },
+        ];
+        this.rocket.on(cc.Node.EventType.TOUCH_START, this.RocketStart, this); //chạm vào rocket để bắt đầu game
+        this.readyLabel.node.getComponent(cc.Animation).play("readyAni");
     },
-    icon: {
-      //icon
-      default: null,
-      type: cc.SpriteAtlas,
-    },
-    character: {
-      //nhan vat dong hanh
-      default: null,
-      type: cc.Node,
-    },
-    score: {
-      //diem
-      default: null,
-      type: cc.Label,
-    },
 
-    tableResult: {
-      //bang ket qua
-      default: null,
-      type: cc.Node,
-    },
-    scoreTable: {
-      //bang diem
-      default: null,
-      type: cc.Label,
-    },
-    tableResume: {
-      //bang tam dung
-      default: null,
-      type: cc.Node,
-    },
+    RocketStart() {
+        if (this._gameStart === false && this._gameOver === false) {
+            this.readyLabel.node.active = false; //ẩn text
+            this.earth.getComponent(cc.Animation).play("earthAni");
 
-    _gameStart: false,
-  },
-
-  start() {
-    setTimeout(() => {
-      // this.node.getComponent("SoundManager").playBackGroundSound();
-    }, 2500);
-  },
-
-  onLoad() {
-    // cc.director.getCollisionManager().enabledDebugDraw = true;
-    cc.debug.setDisplayStats(false);
-
-    this.rocket.on(cc.Node.EventType.TOUCH_START, this.RocketStart, this); //chạm vào rocket để bắt đầu game
-    this.readyLabel.node.getComponent(cc.Animation).play("readyAni");
-    console.log(this.readyLabel);
-  },
-
-  RocketStart() {
-    this._gameStart = true;
-    console.log("Bat dau game");
-    this.readyLabel.node.active = false; //ẩn text
-    this.rocket.getChildByName("power").active = true; //năng lượng hiển thị
-    this.rocket //chạy animation
-      .getChildByName("power")
-      .getComponent(cc.Animation)
-      .play("powerAni");
-
-    this.rocket.getComponent(cc.Animation).play("upAni");
-  },
-
-  startTimeRoller() {
-    //hàm đếm ngược
-    var times = 3;
-    this.schedule(
-      () => {
-        if (times !== 0) {
-          if (!this.countDownNode) {
-            this.countDownNode = cc.instantiate(this.countDown);
-            this.node.addChild(this.countDownNode);
-            this.countDownNode.parent = this.wheelParent;
-          }
-          this.countDownNode.getChildByName("Sp Num").opacity = 255;
-          this.countDownNode.getChildByName("Nodes start").opacity = 0;
-          let spriteFrameName = "num_" + times;
-          this.countDownNode
-            .getChildByName("Sp Num")
-            .getComponent(cc.Sprite).spriteFrame = this.icon.getSpriteFrame(
-            spriteFrameName
-          );
-          this.node
-            .getComponent("SoundManager")
-            .playEffectSound("second", false);
-        } else {
-          this.countDownNode.getChildByName("Sp Num").opacity = 0;
-          this.countDownNode.getChildByName("Nodes start").opacity = 255;
-          this.countDownNode.runAction(cc.fadeOut(1));
-          this.node
-            .getComponent("SoundManager")
-            .playEffectSound("begin", false);
-          this.schedule(this.countDownScheduleCallBack);
+            setTimeout(() => {
+                this.callCreateQuestion();
+            }, 2000);
         }
-        times--;
-      },
-      1,
-      3
-    );
-  },
+        this._gameStart = true;
+    },
 
-  countDownScheduleCallBack() {
-    //các thông số qua các level khác nhau
-  },
+    repeatBackground() {
+        this.background1.node.y -= 1;
+        this.background2.node.y -= 1;
+        if (this.background1.node.y <= -this._backgroundHeight) {
+            this.background1.node.setPosition(0, this._backgroundHeight);
+        }
+        if (this.background2.node.y <= -this._backgroundHeight) {
+            this.background2.node.setPosition(0, this._backgroundHeight);
+        }
+    },
 
-  onFinishGameEvent() {
-    //kết thúc game
-  },
+    runAnimationPlanet(index) {
+        var randomAni = Math.floor(Math.random() * 2) + 1;
+        this.planet.getComponent(
+            cc.Sprite
+        ).spriteFrame = this.planetAtlas.getSpriteFrames()[index];
+        this.namePlanet.string = this.arrNamePlanet[index];
+        if (randomAni === 1) {
+            this.planet.getComponent(cc.Animation).play("planetAni1");
+        } else {
+            this.planet.getComponent(cc.Animation).play("planetAni2");
+        }
 
-  onClickBack() {
-    // cc.director.loadScene("MainGame");
-  },
+        if (this._indexPlanet < 10) {
+            this._indexPlanet++;
+        }
+    },
 
-  onClickReplay() {
-    cc.director.resume();
-    cc.director.loadScene("");
-  },
+    changeColorBackground(r1, g1, b1, r2, g2, b2) {
+        // console.log(this.layerColor.color);
+        this.layerColor.color = new cc.Color(r2, g2, b2);
+    },
 
-  onclickHomeInBackGround() {
-    this.tableResume.active = true;
-    cc.director.pause();
-  },
+    generateRandomCalculations(valueLimit) {
+        //hàm sinh ngẫu nhiên câu hỏi và câu trả lời
+        //random phep tinh
+        var typeCal = Math.floor(Math.random() * 4) + 1;
+        var num1, num2, result;
+        var stateReturn = false; //trang thai phep tinh co thoa man
+        if (typeCal === 1) {
+            //phep nhan
 
-  onClickResume() {
-    cc.director.resume();
-    this.tableResume.active = false;
-  },
+            while (stateReturn === false) {
+                num1 = Math.floor(Math.random() * 10);
+                num2 = Math.floor(Math.random() * 10);
+                result = num1 * num2;
+                if (result <= valueLimit) {
+                    stateReturn = true;
+                }
+            }
+        } else if (typeCal === 2) {
+            //phep chia
+            while (stateReturn === false) {
+                num1 = Math.floor(Math.random() * 10);
+                num2 = Math.floor(Math.random() * 9) + 1;
+                //kiem tra chia het
+                if (num1 % num2 === 0) {
+                    result = num1 / num2;
+                    if (result <= valueLimit) {
+                        stateReturn = true;
+                    }
+                }
+            }
+        } else if (typeCal === 3) {
+            //phep cong
+            while (stateReturn === false) {
+                num1 = Math.floor(Math.random() * 10);
+                num2 = Math.floor(Math.random() * 10);
+                result = num1 + num2;
+                if (result <= valueLimit) {
+                    stateReturn = true;
+                }
+            }
+        } else {
+            //phep tru
+            while (stateReturn === false) {
+                num1 = Math.floor(Math.random() * 10);
+                num2 = Math.floor(Math.random() * 9) + 1;
+                //kiem tra chia het
+                if (num1 >= num2) {
+                    result = num1 - num2;
+                    if (result <= valueLimit) {
+                        stateReturn = true;
+                    }
+                }
+            }
+        }
+        return [typeCal, num1, num2, result];
+    },
 
-  update(dt) {},
+    callCreateQuestion() {
+        // this._numCurrentQuestion++;
+        this.CreateValueQuestion(this._valueLimit);
+        this.questionBox.active = true;
+    },
+
+    CreateValueQuestion(valueLimit) {
+        var arr = this.generateRandomCalculations(valueLimit); //[0] loai phep tinh, [1] num1, [2] num2. [3] ket qua dung
+        var pheptinh = "";
+        if (arr[0] === 1) {
+            pheptinh = "x";
+        } else if (arr[0] === 2) {
+            pheptinh = ":";
+        } else if (arr[0] === 3) {
+            pheptinh = "+";
+        } else {
+            pheptinh = "-";
+        }
+
+        //set cau hoi
+        this.questionText.string = arr[1] + pheptinh + arr[2] + " = ?";
+
+        //set dap an
+        //random dap an dung
+        var trueResult = Math.floor(Math.random() * 3) + 1;
+        this._trueResult = trueResult;
+        //random 2 dam an nhung can check truong hop dap an trung nhau
+        var checkRandomResult = false;
+        var randomresult1, randomresult2;
+        while (checkRandomResult === false) {
+            if (arr[3] > 2) {
+                randomresult1 =
+                    Math.floor(Math.random() * arr[3]) + Math.floor(arr[3] / 2);
+                randomresult2 =
+                    Math.floor(Math.random() * arr[3]) + Math.floor(arr[3] / 2);
+            } else {
+                randomresult1 = Math.floor(Math.random() * 10);
+                randomresult2 = Math.floor(Math.random() * 10);
+            }
+            //kiem tra neu trung nhau
+            if (
+                arr[3] != randomresult1 &&
+                arr[3] != randomresult2 &&
+                randomresult1 != randomresult2
+            ) {
+                checkRandomResult = true;
+            }
+        }
+
+        if (trueResult === 1) {
+            this.resultTextA.string = "A. " + arr[3];
+            this.resultTextB.string = "B. " + randomresult1;
+            this.resultTextC.string = "C. " + randomresult2;
+        } else if (trueResult === 2) {
+            this.resultTextB.string = "B. " + arr[3];
+            this.resultTextA.string = "A. " + randomresult1;
+            this.resultTextC.string = "C. " + randomresult2;
+        } else {
+            this.resultTextC.string = "C. " + arr[3];
+            this.resultTextA.string = "A. " + randomresult1;
+            this.resultTextB.string = "B. " + randomresult2;
+        }
+    },
+
+    handleCheckResult(event, customEventData) {
+        if (customEventData == this._trueResult) {
+            this._numCurrentQuestion++;
+            if (this._numCurrentQuestion % this.numOfQuestionNextPlanet === 0) {
+                this.nofiChangePlanet.string =
+                    "Con đã vượt qua hành tinh" +
+                    "\n" +
+                    this.arrNamePlanet[this._indexPlanet];
+                this.nofiChangePlanet.active = true;
+                this.nofiChangePlanet //run animation
+                    .getComponent(cc.Animation)
+                    .play("nofiChangePlanetAni");
+
+                this.runAnimationPlanet(this._indexPlanet);
+                this.changeColorBackground(
+                    this.arrPickerColor[this._indexPlanet - 1].r,
+                    this.arrPickerColor[this._indexPlanet - 1].g,
+                    this.arrPickerColor[this._indexPlanet - 1].b,
+                    this.arrPickerColor[this._indexPlanet].r,
+                    this.arrPickerColor[this._indexPlanet].g,
+                    this.arrPickerColor[this._indexPlanet].b
+                );
+            }
+            // console.log("Ban da chon dap an dung");
+            //xử lý rocket sẽ bay lên hay gì đó
+            this._dropRocket = false; //khong roi nua ma bay len
+            if (this._numCurrentQuestion === this.numOfQuestion) {
+                this._win = true;
+                this.onFinishGameEvent();
+            }
+        } else {
+            // console.log("Ban da chon sai dap an");
+        }
+        if (
+            this._gameStart === true &&
+            this._numCurrentQuestion <= this.numOfQuestion
+        ) {
+            setTimeout(() => {
+                this.callCreateQuestion();
+            }, 1000);
+        }
+        this.questionBox.active = false;
+    },
+
+    //may bay roi
+    dropRocket() {
+        this._dropRocket = true;
+    },
+
+    spawnNewBackround() {
+        var newBackround = cc.instantiate(this.objectChainPrefab);
+        this.node.addChild(newBackround);
+        newBackround.setPosition(0, 1500);
+        // newBackround.parent = this.chainsParent;
+    },
+
+    onFinishGameEvent() {
+        //kết thúc game
+        this._gameStart = false; //trang thai game false
+        this._gameOver = true;
+        if (this._win === true) {
+            //thang
+            console.log("thang");
+        } else {
+            //thua
+            console.log("thua");
+        }
+        this.questionBox.active = false;
+        this.tableResult.getComponent(cc.Animation).play();
+    },
+
+    onClickBack() {
+        // cc.director.loadScene("MainGame");
+    },
+
+    onClickReplay() {
+        cc.director.resume();
+        cc.director.loadScene("GameRocket");
+    },
+
+    onclickHomeInBackGround() {
+        this.tableResume.active = true;
+        cc.director.pause();
+    },
+
+    onClickResume() {
+        cc.director.resume();
+        this.tableResume.active = false;
+    },
+
+    update(dt) {
+        //repeat background
+        if (this._gameStart === true) {
+            this.repeatBackground();
+        }
+        //xử lý máy bay sẽ bị rơi dần dần xuống nếu không chọn đáp án đúng hoặc chọn sai
+        if (this._dropRocket === true) {
+            if (this._flyUp === true) {
+                this.rocket._components[0].animation = "nomal_fly";
+                this.starDrop.active = false;
+            }
+            this._flyUp = false;
+            this.rocket.y = this.rocket.y - 2;
+            if (this.rocket.y < -(window.height / 2 - 75)) {
+                this._dropRocket = false;
+                this._win = false;
+                this.onFinishGameEvent();
+            }
+        } else if (this._gameStart === true) {
+            if (this._flyUp === false) {
+                this.rocket._components[0].animation = "fast_fly";
+            }
+            this.starDrop.active = true;
+            this._flyUp = true;
+            this.rocket.y = this.rocket.y + 10;
+            if (this.rocket.y > window.height / 2 - 200) {
+                this._dropRocket = true;
+            }
+        }
+    },
 });
