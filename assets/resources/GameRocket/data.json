@@ -1,0 +1,7 @@
+{
+	"lessons" : {
+        "arrNamePlanet" : ["Sao Thổ", "Mặt Trăng", "Sao Kim", "Sao Thiên Vương", "Sao Hỏa", "Sao Diêm Vương", "Sao Thủy", "Mặt Trời", "Sao Mộc", "Trái Đất"],
+        "arrNamePlanetImg": ["saotho","mattrang","saokim","saothienvuong","saohoa","saodiemvuong","saothuy","mattroi","saomoc","traidat"],
+        "arrPickerColor": ["saotho","mattrang","saokim","saothienvuong","saohoa","saodiemvuong","saothuy","mattroi","saomoc","traidat"]
+	}
+}

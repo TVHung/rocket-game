@@ -1,9 +1,9 @@
 {
   "__type__": "cc.AnimationClip",
-  "_name": "hanhtinhAni",
+  "_name": "planetAni1",
   "_objFlags": 0,
   "_native": "",
-  "_duration": 2.0166666666666666,
+  "_duration": 2,
   "sample": 60,
   "speed": 0.3,
   "wrapMode": 1,
@@ -18,20 +18,20 @@
           ],
           "motionPath": [
             [
-              228,
-              349,
-              86,
-              666,
-              440,
-              -126
+              334,
+              82,
+              165,
+              561,
+              539,
+              -503
             ]
           ]
         },
         {
-          "frame": 2.0166666666666666,
+          "frame": 2,
           "value": [
-            445,
-            -894
+            464,
+            -1394
           ],
           "motionPath": []
         }
@@ -46,7 +46,15 @@
           }
         },
         {
-          "frame": 2.0166666666666666,
+          "frame": 1.6666666666666667,
+          "value": {
+            "__type__": "cc.Vec2",
+            "x": 2,
+            "y": 2
+          }
+        },
+        {
+          "frame": 2,
           "value": {
             "__type__": "cc.Vec2",
             "x": 2,

@@ -6,6 +6,11 @@ cc.Class({
             default: null,
             type: cc.Node,
         },
+        //thiếu aniamtion đứng yên nên cần tạo 1 hình khác để khi bắt đầu chưa phóng lửa
+        rocketOnTouch: {
+            default: null,
+            type: cc.Node,
+        },
         questionBox: {
             default: null,
             type: cc.Node,
@@ -26,6 +31,18 @@ cc.Class({
             default: null,
             type: cc.Label,
         },
+        BtnA: {
+            default: null,
+            type: cc.Button,
+        },
+        BtnB: {
+            default: null,
+            type: cc.Button,
+        },
+        BtnC: {
+            default: null,
+            type: cc.Button,
+        },
         readyLabel: {
             default: null,
             type: cc.Label,
@@ -37,6 +54,10 @@ cc.Class({
         background2: {
             default: null,
             type: cc.Sprite,
+        },
+        nofiTable: {
+            default: null,
+            type: cc.Node,
         },
         nofiChangePlanet: {
             default: null,
@@ -94,6 +115,7 @@ cc.Class({
         },
 
         _gameStart: false, //state game
+        _runBackground: false,
         _numCurrentQuestion: 0, //so cau hoi da tra loi
         _numTrueQuestion: 0, //so cau tra loi dung hien tai
         numOfQuestion: 0, //số lượng câu hỏi (input)
@@ -109,15 +131,35 @@ cc.Class({
         _gameOver: false,
         _backgroundWidth: 0, //kich thuoc background
         _backgroundHeight: 0,
-        _indexPlanet: 1, //thu tu cac hanh tinh se duoc goi
+        _indexPlanet: 0, //thu tu cac hanh tinh se duoc goi
+        _speedBackground: 1,
+        _speedDrop: 2,
+        _choiced: 0,
+        _khoangCach: 74,
+        _khoangCach1Cau: 0,
+        _heart: 3,
+
+        //data
+        _typeCaculator: 0,
+        _numValue: 0,
+        _typeOption: null,
     },
 
     onLoad() {
         // cc.director.getCollisionManager().enabledDebugDraw = true;
         cc.debug.setDisplayStats(false);
+
+        this._valueLimit = parseInt(window.localStorage.getItem("valueInput"));
+        console.log(this._valueLimit);
+
+        const data = JSON.parse(window.localStorage.getItem("data"));
+        this._typeCaculator = parseInt(data.type);
+        this._numValue = parseInt(data.num);
+        this._typeOption = parseInt(data.option);
+
         this.questionBox.active = false;
         this.nofiChangePlanet.active = false;
-        this.node.getComponent("SoundManagerGameRocket").playBackGroundSound();
+        // this.node.getComponent("SoundManagerGameRocket").playBackGroundSound();
 
         this._backgroundWidth = this.background2.node.getContentSize().width;
         this._backgroundHeight = this.background2.node.getContentSize().height;
@@ -127,8 +169,10 @@ cc.Class({
         window.width = cc.view._designResolutionSize.width;
         window.height = cc.view._designResolutionSize.height;
 
-        arrNamePlanet = new Array(); //ten cac hanh tinh
-        this.arrNamePlanet = [
+        this._khoangCach1Cau = this._khoangCach / this.numOfQuestion;
+        console.log(this._khoangCach1Cau);
+
+        window.arrNamePlanet = new Array(
             "Sao Thổ",
             "Mặt Trăng",
             "Sao Kim",
@@ -138,10 +182,10 @@ cc.Class({
             "Sao Thủy",
             "Mặt Trời",
             "Sao Mộc",
-            "Trái Đất",
-        ];
-        arrNamePlanetImg = new Array(); //ten cac hanh tinh
-        this.arrNamePlanetImg = [
+            "Trái Đất"
+        ); //ten cac hanh tinh
+
+        window.arrNamePlanetImg = new Array(
             "saotho",
             "mattrang",
             "saokim",
@@ -151,25 +195,32 @@ cc.Class({
             "saothuy",
             "mattroi",
             "saomoc",
-            "traidat",
-        ];
-        arrPickerColor = new Array(); //mang ma mau
-        this.arrPickerColor = [
-            { r: 255, g: 0, b: 0 },
-            { r: 252, g: 140, b: 3 },
-            { r: 252, g: 240, b: 3 },
-            { r: 152, g: 252, b: 3 },
-            { r: 28, g: 252, b: 3 },
-            { r: 2, g: 252, b: 152 },
-            { r: 3, g: 248, b: 252 },
-            { r: 3, g: 132, b: 252 },
-            { r: 11, g: 3, b: 252 },
-            { r: 177, g: 3, b: 252 },
-        ];
-        this.rocket.on(cc.Node.EventType.TOUCH_START, this.RocketStart, this); //chạm vào rocket để bắt đầu game
+            "traidat"
+        ); //ten cac hanh tinh
+
+        window.arrPickerColor = new Array(
+            { r: 155, g: 73, b: 13 },
+            { r: 150, g: 150, b: 150 },
+            { r: 99, g: 64, b: 18 },
+            { r: 0, g: 68, b: 160 },
+            { r: 158, g: 29, b: 0 },
+            { r: 169, g: 75, b: 10 },
+            { r: 0, g: 196, b: 255 },
+            { r: 250, g: 128, b: 6 },
+            { r: 255, g: 180, b: 0 },
+            { r: 1, g: 51, b: 220 }
+        ); //mang ma mau
+
+        this.rocket.active = false;
+        this.rocketOnTouch.on(
+            cc.Node.EventType.TOUCH_START,
+            this.RocketStart,
+            this
+        ); //chạm vào rocket để bắt đầu game
         this.readyLabel.node.getComponent(cc.Animation).play("readyAni");
     },
 
+    //start game
     RocketStart() {
         if (this._gameStart === false && this._gameOver === false) {
             this.readyLabel.node.active = false; //ẩn text
@@ -179,93 +230,39 @@ cc.Class({
                 this.callCreateQuestion();
             }, 2000);
             console.log("Cham start");
+            this._runBackground = true;
+            this.rocket.active = true;
+            this.rocketOnTouch.active = false;
         }
         if (this._gameOver === false) {
             this._gameStart = true;
         }
         console.log("cham");
+        console.log(window.arrNamePlanet);
     },
 
-    repeatBackground() {
-        this.background1.node.y -= 1;
-        this.background2.node.y -= 1;
-        if (this.background1.node.y <= -this._backgroundHeight) {
-            this.background1.node.setPosition(0, this._backgroundHeight);
-        }
-        if (this.background2.node.y <= -this._backgroundHeight) {
-            this.background2.node.setPosition(0, this._backgroundHeight);
-        }
-    },
-
-    runAnimationPlanet(index) {
-        var randomAni = Math.floor(Math.random() * 2) + 1;
-        this.planet.getComponent(
-            cc.Sprite
-        ).spriteFrame = this.planetAtlas.getSpriteFrame(
-            this.arrNamePlanetImg[this._indexPlanet]
-        );
-        this.namePlanet.string = this.arrNamePlanet[index];
-        if (randomAni === 1) {
-            this.planet.getComponent(cc.Animation).play("planetAni1");
-        } else {
-            this.planet.getComponent(cc.Animation).play("planetAni2");
-        }
-
-        if (this._indexPlanet < 10 - 1) {
-            this._indexPlanet++;
-        }
-    },
-
-    changeColorBackground(r1, g1, b1, r2, g2, b2) {
-        // console.log(this.layerColor.color);
-        this.layerColor.color = new cc.Color(r2, g2, b2);
-    },
-
+    // create question data
     generateRandomCalculations(valueLimit) {
         //hàm sinh ngẫu nhiên câu hỏi và câu trả lời
         //random phep tinh
-        var typeCal = Math.floor(Math.random() * 4) + 1;
+        var typeCal = this._typeCaculator;
         var num1, num2, result;
         var stateReturn = false; //trang thai phep tinh co thoa man
         if (typeCal === 1) {
-            //phep nhan
-
-            while (stateReturn === false) {
-                num1 = Math.floor(Math.random() * 10);
-                num2 = Math.floor(Math.random() * 10);
-                result = num1 * num2;
-                if (result <= valueLimit) {
-                    stateReturn = true;
-                }
-            }
-        } else if (typeCal === 2) {
-            //phep chia
-            while (stateReturn === false) {
-                num1 = Math.floor(Math.random() * 10);
-                num2 = Math.floor(Math.random() * 9) + 1;
-                //kiem tra chia het
-                if (num1 % num2 === 0) {
-                    result = num1 / num2;
-                    if (result <= valueLimit) {
-                        stateReturn = true;
-                    }
-                }
-            }
-        } else if (typeCal === 3) {
             //phep cong
             while (stateReturn === false) {
-                num1 = Math.floor(Math.random() * 10);
-                num2 = Math.floor(Math.random() * 10);
+                num1 = Math.floor(Math.random() * (this._valueLimit + 1));
+                num2 = Math.floor(Math.random() * (this._valueLimit + 1));
                 result = num1 + num2;
                 if (result <= valueLimit) {
                     stateReturn = true;
                 }
             }
-        } else {
+        } else if (typeCal === 2) {
             //phep tru
             while (stateReturn === false) {
-                num1 = Math.floor(Math.random() * 10);
-                num2 = Math.floor(Math.random() * 9) + 1;
+                num1 = Math.floor(Math.random() * (this._valueLimit + 1));
+                num2 = Math.floor(Math.random() * (this._valueLimit + 1));
                 //kiem tra chia het
                 if (num1 >= num2) {
                     result = num1 - num2;
@@ -274,31 +271,83 @@ cc.Class({
                     }
                 }
             }
+        } else if (typeCal === 3) {
+            //phep nhan
+
+            //theo gioi han
+            // while (stateReturn === false) {
+            //     num1 = Math.floor(Math.random() * (this._valueLimit + 1));
+            //     num2 = Math.floor(Math.random() * (this._valueLimit + 1));
+            //     result = num1 * num2;
+            //     if (result <= valueLimit) {
+            //         stateReturn = true;
+            //     }
+            // }
+
+            //bang cuu chuong
+            num1 = this._numValue;
+            num2 = Math.floor(Math.random() * 10) + 1;
+            result = num1 * num2;
+        } else if (typeCal === 4) {
+            //phep chia
+            // while (stateReturn === false) {
+            //     num1 = Math.floor(Math.random() * (this._valueLimit + 1));
+            //     num2 = Math.floor(Math.random() * this._valueLimit) + 1;
+            //     //kiem tra chia het
+            //     if (num1 % num2 === 0) {
+            //         result = num1 / num2;
+            //         if (result <= valueLimit) {
+            //             stateReturn = true;
+            //         }
+            //     }
+            // }
+
+            num1 = (Math.floor(Math.random() * 10) + 1) * this._numValue;
+            num2 = this._numValue;
+            result = num1 / num2;
+        } else if (typeCal === 5) {
+            //so sanh
+        } else {
+            //tong hop
         }
+
         return [typeCal, num1, num2, result];
     },
 
     callCreateQuestion() {
         // this._numCurrentQuestion++;
+        this.BtnA.node.getChildByName("BackgroundGreen").active = false;
+        this.BtnA.node.getChildByName("BackgroundRed").active = false;
+        this.BtnB.node.getChildByName("BackgroundGreen").active = false;
+        this.BtnB.node.getChildByName("BackgroundRed").active = false;
+        this.BtnC.node.getChildByName("BackgroundGreen").active = false;
+        this.BtnC.node.getChildByName("BackgroundRed").active = false;
         this.CreateValueQuestion(this._valueLimit);
-        this.questionBox.active = true;
+        if (this._gameStart === true) {
+            this.questionBox.active = true;
+        }
     },
 
     CreateValueQuestion(valueLimit) {
         var arr = this.generateRandomCalculations(valueLimit); //[0] loai phep tinh, [1] num1, [2] num2. [3] ket qua dung
         var pheptinh = "";
         if (arr[0] === 1) {
-            pheptinh = "x";
-        } else if (arr[0] === 2) {
-            pheptinh = ":";
-        } else if (arr[0] === 3) {
             pheptinh = "+";
-        } else {
+        } else if (arr[0] === 2) {
             pheptinh = "-";
+        } else if (arr[0] === 3) {
+            pheptinh = "x";
+        } else if (arr[0] === 4) {
+            pheptinh = ":";
+        } else if (arr[0] === 5) {
+            //xu ly chon phep tinh
+        } else {
+            //xu ly tong hop
         }
 
         //set cau hoi
-        this.questionText.string = arr[1] + pheptinh + arr[2] + " = ?";
+        this.questionText.string =
+            arr[1] + " " + pheptinh + " " + arr[2] + " = ?";
 
         //set dap an
         //random dap an dung
@@ -342,107 +391,162 @@ cc.Class({
         }
     },
 
-    handleCheckResult(event, customEventData) {
-        this.questionBox.active = false;
-        if (
-            customEventData == this._trueResult &&
-            this._numCurrentQuestion < this.numOfQuestion
-        ) {
-            this.node
-                .getComponent("SoundManagerGameRocket")
-                .playEffectSound("trueClick", false);
-            this._numCurrentQuestion++;
-            if (this._numCurrentQuestion % this.numOfQuestionNextPlanet === 0) {
-                this.nofiChangePlanet.active = true;
-                this.nofiChangePlanet.string =
-                    "Con đã đến" + "\n" + this.arrNamePlanet[this._indexPlanet];
-                this.nofiChangePlanet //run animation
-                    .getComponent(cc.Animation)
-                    .play("nofiChangePlanetAni");
+    // data change follow time
+    repeatBackground() {
+        this.background1.node.y -= this._speedBackground;
+        this.background2.node.y -= this._speedBackground;
+        if (this.background1.node.y <= -this._backgroundHeight) {
+            this.background1.node.setPosition(0, window.height);
+        }
+        if (this.background2.node.y <= -this._backgroundHeight) {
+            this.background2.node.setPosition(0, window.height);
+        }
+    },
 
-                this.runAnimationPlanet(this._indexPlanet);
-                this.changeColorBackground(
-                    this.arrPickerColor[this._indexPlanet - 1].r,
-                    this.arrPickerColor[this._indexPlanet - 1].g,
-                    this.arrPickerColor[this._indexPlanet - 1].b,
-                    this.arrPickerColor[this._indexPlanet].r,
-                    this.arrPickerColor[this._indexPlanet].g,
-                    this.arrPickerColor[this._indexPlanet].b
-                );
-            }
-            // console.log("Ban da chon dap an dung");
-            //xử lý rocket sẽ bay lên hay gì đó
-            this._dropRocket = false; //khong roi nua ma bay len
+    runAnimationPlanet(index) {
+        var randomAni = Math.floor(Math.random() * 2) + 1;
+        //get image planet
+        this.planet.getComponent(
+            cc.Sprite
+        ).spriteFrame = this.planetAtlas.getSpriteFrame(
+            window.arrNamePlanetImg[this._indexPlanet]
+        );
+        this.namePlanet.string = window.arrNamePlanet[index];
+        if (randomAni === 1) {
+            this.planet.getComponent(cc.Animation).play("planetAni1");
         } else {
-            // console.log("Ban da chon sai dap an");
-            this.node
-                .getComponent("SoundManagerGameRocket")
-                .playEffectSound("wrongClick", false);
+            this.planet.getComponent(cc.Animation).play("planetAni2");
         }
-        if (
-            this._gameStart === true &&
-            this._numCurrentQuestion < this.numOfQuestion
-        ) {
+
+        if (this._indexPlanet < 10 - 1) {
+            this._indexPlanet++;
+        }
+    },
+
+    effectOnClickButton(index, trueOrFalse) {
+        if (trueOrFalse === true) {
+            if (index === 1) {
+                this.BtnA.node.getChildByName("BackgroundGreen").active = true;
+                this.BtnA.node.getChildByName("BackgroundRed").active = false;
+                this.BtnA.node.getComponent(cc.Animation).play("buttonAni");
+            } else if (index === 2) {
+                this.BtnB.node.getChildByName("BackgroundGreen").active = true;
+                this.BtnB.node.getChildByName("BackgroundRed").active = false;
+                this.BtnB.node.getComponent(cc.Animation).play("buttonAni");
+            } else {
+                this.BtnC.node.getChildByName("BackgroundGreen").active = true;
+                this.BtnC.node.getChildByName("BackgroundRed").active = false;
+                this.BtnC.node.getComponent(cc.Animation).play("buttonAni");
+            }
+        } else {
+            if (index === 1) {
+                this.BtnA.node.getChildByName("BackgroundGreen").active = false;
+                this.BtnA.node.getChildByName("BackgroundRed").active = true;
+                this.BtnA.node.getComponent(cc.Animation).play("buttonAni");
+            } else if (index === 2) {
+                this.BtnB.node.getChildByName("BackgroundGreen").active = false;
+                this.BtnB.node.getChildByName("BackgroundRed").active = true;
+                this.BtnB.node.getComponent(cc.Animation).play("buttonAni");
+            } else {
+                this.BtnC.node.getChildByName("BackgroundGreen").active = false;
+                this.BtnC.node.getChildByName("BackgroundRed").active = true;
+                this.BtnC.node.getComponent(cc.Animation).play("buttonAni");
+            }
+        }
+    },
+
+    speedForLevel() {
+        this._speedDrop = this._speedDrop * 1.15;
+    },
+
+    changeColorBackground(r, g, b) {
+        // console.log(this.layerColor.color);
+        this.layerColor.color = new cc.Color(r, g, r);
+    },
+
+    onRocketDie() {
+        this._heart--;
+        //run animation no tung
+
+        //xu ly hoi sinh rocket
+    },
+
+    //on click button
+    handleCheckResult(event, customEventData) {
+        this._choiced++;
+        customEventData = parseInt(customEventData);
+        if (this._choiced === 1) {
+            if (
+                customEventData == this._trueResult &&
+                this._numCurrentQuestion < this.numOfQuestion
+            ) {
+                this.node
+                    .getComponent("SoundManagerGameRocket")
+                    .playEffectSound("trueClick", false);
+                this._numCurrentQuestion++;
+                if (
+                    this._numCurrentQuestion % this.numOfQuestionNextPlanet ===
+                    0
+                ) {
+                    this.nofiChangePlanet.active = true;
+                    this.nofiChangePlanet.string =
+                        window.arrNamePlanet[this._indexPlanet] +
+                        "\n" +
+                        "Lực hút: " +
+                        Math.ceil(this._speedDrop) +
+                        " Newton";
+                    this.nofiTable //run animation
+                        .getComponent(cc.Animation)
+                        .play("nofiTableAni");
+
+                    this.changeColorBackground(
+                        window.arrPickerColor[this._indexPlanet].r,
+                        window.arrPickerColor[this._indexPlanet].g,
+                        window.arrPickerColor[this._indexPlanet].b
+                    );
+                    this.runAnimationPlanet(this._indexPlanet);
+                    this.speedForLevel();
+                }
+                //xử lý rocket sẽ bay lên hay gì đó
+                this._dropRocket = false; //khong roi nua ma bay len
+
+                //xu ly nhap nhay khi chon dung
+
+                this.effectOnClickButton(customEventData, true);
+            } else {
+                this.node
+                    .getComponent("SoundManagerGameRocket")
+                    .playEffectSound("wrongClick", false);
+
+                //xu ly nhap nhay khi chon sai
+                this.effectOnClickButton(customEventData, false);
+            }
             setTimeout(() => {
-                this.callCreateQuestion();
-            }, 1000);
+                this.questionBox.active = false;
+            }, 600);
+            if (
+                this._gameStart === true &&
+                this._numCurrentQuestion < this.numOfQuestion
+            ) {
+                setTimeout(() => {
+                    this.callCreateQuestion();
+                    this._choiced = 0;
+                }, 900);
+            }
         }
+
         if (this._numCurrentQuestion >= this.numOfQuestion) {
             this._win = true;
             this.onFinishGameEvent();
         }
-        this.questionBox.active = false;
         console.log(this._numCurrentQuestion);
-    },
-
-    //may bay roi
-    dropRocket() {
-        this._dropRocket = true;
-    },
-
-    spawnNewBackround() {
-        var newBackround = cc.instantiate(this.objectChainPrefab);
-        this.node.addChild(newBackround);
-        newBackround.setPosition(0, 1500);
-        // newBackround.parent = this.chainsParent;
-    },
-
-    onFinishGameEvent() {
-        //kết thúc game
-        this._gameStart = false; //trang thai game false
-        this._gameOver = true;
-        this.questionBox.active = false;
-
-        setTimeout(() => {
-            if (this._win === true) {
-                //thang
-                this.node
-                    .getComponent("SoundManagerGameRocket")
-                    .playEffectSound("win", false);
-                this.tableResult
-                    .getChildByName("ChucMung")
-                    .getComponent(cc.Label).string =
-                    "Chúc mừng con đã vượt qua thử thách";
-                console.log("thang");
-            } else {
-                //thua
-                this.node
-                    .getComponent("SoundManagerGameRocket")
-                    .playEffectSound("lose", false);
-                this.tableResult
-                    .getChildByName("ChucMung")
-                    .getComponent(cc.Label).string = "Con cần cố gắng hơn nữa";
-                console.log("thua");
-            }
-            this.tableResult.getComponent(cc.Animation).play();
-        }, 1500);
     },
 
     onClickBack() {
         this.node
             .getComponent("SoundManagerGameRocket")
             .playEffectSound("onClick", false);
-        // cc.director.loadScene("MainGame");
+        cc.director.loadScene("GameInput");
     },
 
     onClickReplay() {
@@ -469,25 +573,93 @@ cc.Class({
         this.tableResume.active = false;
     },
 
+    // on end game
+
+    onFinishGameEvent() {
+        //kết thúc game
+        this._gameStart = false; //trang thai game false
+        this._gameOver = true;
+        this.questionBox.active = false;
+
+        setTimeout(() => {
+            var chinhPhuc = 0;
+            if (this._win === true) {
+                //thang
+                chinhPhuc = this._khoangCach;
+                this.node
+                    .getComponent("SoundManagerGameRocket")
+                    .playEffectSound("win", false);
+                this.tableResult
+                    .getChildByName("hanhTinhDungLai")
+                    .getComponent(cc.Label).string = "Chiến Thắng";
+
+                //bay ra khoi man hinh khi chien thang
+                cc.tween(this.rocket)
+                    .to(1, {
+                        position: cc.v2(this.rocket.x, this.rocket.y + 1000),
+                    })
+                    .start();
+                console.log("thang");
+            } else {
+                //thua
+                chinhPhuc = Math.ceil(
+                    this._khoangCach1Cau * this._numCurrentQuestion
+                );
+                this.node
+                    .getComponent("SoundManagerGameRocket")
+                    .playEffectSound("lose", false);
+                this.tableResult
+                    .getChildByName("hanhTinhDungLai")
+                    .getComponent(cc.Label).string =
+                    window.arrNamePlanet[this._indexPlanet];
+            }
+            var chinhPhuc = Math.ceil(
+                this._khoangCach1Cau * this._numCurrentQuestion
+            );
+            this.tableResult
+                .getChildByName("ChinhPhuc")
+                .getComponent(cc.Label).string =
+                "Chinh Phục: " + chinhPhuc + " tỷ km";
+            this.tableResult
+                .getChildByName("ThanhTuu")
+                .getComponent(cc.Label).string =
+                "Thành Tích: " + (this._indexPlanet + 1) + "/10";
+            this.tableResult.getComponent(cc.Animation).play();
+        }, 1000);
+    },
+
     update(dt) {
         //repeat background
-        if (this._gameStart === true) {
+        if (this._runBackground === true) {
             this.repeatBackground();
         }
         //xử lý máy bay sẽ bị rơi dần dần xuống nếu không chọn đáp án đúng hoặc chọn sai
         if (this._dropRocket === true) {
+            this._speedBackground = 1;
             if (this._flyUp === true) {
                 this.rocket._components[0].animation = "nomal_fly";
                 this.starDrop.active = false;
             }
-            this._flyUp = false;
-            this.rocket.y = this.rocket.y - 2;
+            this._flyUp = false; //xu ly truong hop bay ngang
+            if (this._flyRight === false) {
+                this.rocket.x = this.rocket.x + 1;
+                if (this.rocket.x > 150) {
+                    this._flyRight = true;
+                }
+            } else {
+                this.rocket.x = this.rocket.x - 1;
+                if (this.rocket.x < -150) {
+                    this._flyRight = false;
+                }
+            }
+            this.rocket.y = this.rocket.y - this._speedDrop;
             if (this.rocket.y < -(window.height / 2 - 75)) {
                 this._dropRocket = false;
                 this._win = false;
                 this.onFinishGameEvent();
             }
         } else if (this._gameStart === true && this._gameOver === false) {
+            this._speedBackground = 10; //tăng tốc độ
             if (this._flyUp === false) {
                 this.rocket._components[0].animation = "fast_fly";
             }
