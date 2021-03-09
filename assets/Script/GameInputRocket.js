@@ -83,6 +83,8 @@ cc.Class({
 
         this.screen1.active = true;
         this.screen2.active = false;
+
+        this.node.getComponent("SoundManagerGameRocket").playBackMenuSound();
     },
 
     hideScreen1ShowScreen2(s1, s2) {
@@ -122,6 +124,7 @@ cc.Class({
         };
 
         window.localStorage.setItem("data", JSON.stringify(dataNhan));
+        this.node.getComponent("SoundManagerGameRocket").pauseMusic();
         cc.director.loadScene("GameRocket");
     },
 
@@ -143,6 +146,7 @@ cc.Class({
         };
 
         window.localStorage.setItem("data", JSON.stringify(dataChia));
+        this.node.getComponent("SoundManagerGameRocket").pauseMusic();
         cc.director.loadScene("GameRocket");
     },
 

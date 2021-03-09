@@ -113,6 +113,10 @@ cc.Class({
             default: null,
             type: cc.Node,
         },
+        heartTimesLabel: {
+            default: null,
+            type: cc.Label,
+        },
 
         _gameStart: false, //state game
         _runBackground: false,
@@ -137,7 +141,8 @@ cc.Class({
         _choiced: 0,
         _khoangCach: 74,
         _khoangCach1Cau: 0,
-        _heart: 3,
+        _heart: 10,
+        _checkGiamHeart: 0, // kiem tra khi nao thi moi la luc giam tro giup = 0 thi moi chay
 
         //data
         _typeCaculator: 0,
@@ -159,7 +164,9 @@ cc.Class({
 
         this.questionBox.active = false;
         this.nofiChangePlanet.active = false;
-        // this.node.getComponent("SoundManagerGameRocket").playBackGroundSound();
+        this.node
+            .getComponent("SoundManagerGameRocket")
+            .playEffectSound("loinoidau", false);
 
         this._backgroundWidth = this.background2.node.getContentSize().width;
         this._backgroundHeight = this.background2.node.getContentSize().height;
@@ -218,11 +225,15 @@ cc.Class({
             this
         ); //chạm vào rocket để bắt đầu game
         this.readyLabel.node.getComponent(cc.Animation).play("readyAni");
+        this._heart = 10;
     },
 
     //start game
     RocketStart() {
         if (this._gameStart === false && this._gameOver === false) {
+            this.node
+                .getComponent("SoundManagerGameRocket")
+                .playBackGroundSound();
             this.readyLabel.node.active = false; //ẩn text
             this.earth.getComponent(cc.Animation).play("earthAni");
 
@@ -423,20 +434,36 @@ cc.Class({
         }
     },
 
-    effectOnClickButton(index, trueOrFalse) {
+    effectOnClickButton(index, trueOrFalse, type) {
+        // index la thu tu nut se chay, trueOrFalse do se la nut dung hay sai, type la loai chon hay loai goi y
         if (trueOrFalse === true) {
             if (index === 1) {
                 this.BtnA.node.getChildByName("BackgroundGreen").active = true;
                 this.BtnA.node.getChildByName("BackgroundRed").active = false;
                 this.BtnA.node.getComponent(cc.Animation).play("buttonAni");
+                // if (type === 2) {
+                //     this.BtnA.node.getChildByName(
+                //         "BackgroundGreen"
+                //     ).active = false;
+                // }
             } else if (index === 2) {
                 this.BtnB.node.getChildByName("BackgroundGreen").active = true;
                 this.BtnB.node.getChildByName("BackgroundRed").active = false;
                 this.BtnB.node.getComponent(cc.Animation).play("buttonAni");
+                // if (type === 2) {
+                //     this.BtnB.node.getChildByName(
+                //         "BackgroundGreen"
+                //     ).active = false;
+                // }
             } else {
                 this.BtnC.node.getChildByName("BackgroundGreen").active = true;
                 this.BtnC.node.getChildByName("BackgroundRed").active = false;
                 this.BtnC.node.getComponent(cc.Animation).play("buttonAni");
+                // if (type === 2) {
+                //     this.BtnC.node.getChildByName(
+                //         "BackgroundGreen"
+                //     ).active = false;
+                // }
             }
         } else {
             if (index === 1) {
@@ -512,14 +539,14 @@ cc.Class({
 
                 //xu ly nhap nhay khi chon dung
 
-                this.effectOnClickButton(customEventData, true);
+                this.effectOnClickButton(customEventData, true, 1);
             } else {
                 this.node
                     .getComponent("SoundManagerGameRocket")
                     .playEffectSound("wrongClick", false);
 
                 //xu ly nhap nhay khi chon sai
-                this.effectOnClickButton(customEventData, false);
+                this.effectOnClickButton(customEventData, false, 1);
             }
             setTimeout(() => {
                 this.questionBox.active = false;
@@ -553,6 +580,7 @@ cc.Class({
         this.node
             .getComponent("SoundManagerGameRocket")
             .playEffectSound("onClick", false);
+        this.node.getComponent("SoundManagerGameRocket").pauseMusic();
         cc.director.resume();
         cc.director.loadScene("GameRocket");
     },
@@ -561,6 +589,7 @@ cc.Class({
         this.node
             .getComponent("SoundManagerGameRocket")
             .playEffectSound("onClick", false);
+        this.node.getComponent("SoundManagerGameRocket").pauseMusic();
         this.tableResume.active = true;
         cc.director.pause();
     },
@@ -569,12 +598,22 @@ cc.Class({
         this.node
             .getComponent("SoundManagerGameRocket")
             .playEffectSound("onClick", false);
+        // this.node.getComponent("SoundManagerGameRocket").resumeMusic();
         cc.director.resume();
         this.tableResume.active = false;
     },
 
-    // on end game
+    // goi y dap an khi gan chet
+    suggestAnswer() {
+        if (this._heart > 0) {
+            this._heart--;
+            this.heartTimesLabel.string = this._heart + "";
+            //run animation nhap nhay
+            this.effectOnClickButton(this._trueResult, true, 2);
+        }
+    },
 
+    // on end game
     onFinishGameEvent() {
         //kết thúc game
         this._gameStart = false; //trang thai game false
@@ -589,14 +628,17 @@ cc.Class({
                 this.node
                     .getComponent("SoundManagerGameRocket")
                     .playEffectSound("win", false);
+                this.node
+                    .getComponent("SoundManagerGameRocket")
+                    .playEffectSound("hoanthanh", false);
                 this.tableResult
                     .getChildByName("hanhTinhDungLai")
                     .getComponent(cc.Label).string = "Chiến Thắng";
 
                 //bay ra khoi man hinh khi chien thang
                 cc.tween(this.rocket)
-                    .to(1, {
-                        position: cc.v2(this.rocket.x, this.rocket.y + 1000),
+                    .to(2, {
+                        position: cc.v2(this.rocket.x, this.rocket.y + 2000),
                     })
                     .start();
                 console.log("thang");
@@ -608,6 +650,9 @@ cc.Class({
                 this.node
                     .getComponent("SoundManagerGameRocket")
                     .playEffectSound("lose", false);
+                this.node
+                    .getComponent("SoundManagerGameRocket")
+                    .playEffectSound("cancogang", false);
                 this.tableResult
                     .getChildByName("hanhTinhDungLai")
                     .getComponent(cc.Label).string =
@@ -623,7 +668,7 @@ cc.Class({
             this.tableResult
                 .getChildByName("ThanhTuu")
                 .getComponent(cc.Label).string =
-                "Thành Tích: " + (this._indexPlanet + 1) + "/10";
+                "Thành Tích: " + this._indexPlanet + "/10";
             this.tableResult.getComponent(cc.Animation).play();
         }, 1000);
     },
@@ -640,7 +685,16 @@ cc.Class({
                 this.rocket._components[0].animation = "nomal_fly";
                 this.starDrop.active = false;
             }
-            this._flyUp = false; //xu ly truong hop bay ngang
+            if (
+                this.rocket.y < -(window.height / 2 - 400) &&
+                this._checkGiamHeart === 0 &&
+                this._heart > 0
+            ) {
+                this._checkGiamHeart++;
+                this.suggestAnswer();
+            }
+            this._flyUp = false;
+            //xu ly truong hop bay ngang
             if (this._flyRight === false) {
                 this.rocket.x = this.rocket.x + 1;
                 if (this.rocket.x > 150) {
@@ -652,6 +706,7 @@ cc.Class({
                     this._flyRight = false;
                 }
             }
+
             this.rocket.y = this.rocket.y - this._speedDrop;
             if (this.rocket.y < -(window.height / 2 - 75)) {
                 this._dropRocket = false;
@@ -659,12 +714,14 @@ cc.Class({
                 this.onFinishGameEvent();
             }
         } else if (this._gameStart === true && this._gameOver === false) {
+            this._checkGiamHeart = 0;
             this._speedBackground = 10; //tăng tốc độ
             if (this._flyUp === false) {
                 this.rocket._components[0].animation = "fast_fly";
             }
             this.starDrop.active = true;
             this._flyUp = true;
+
             if (this._flyRight === true) {
                 this.rocket.x = this.rocket.x + 1;
                 if (this.rocket.x > 150) {
@@ -676,6 +733,7 @@ cc.Class({
                     this._flyRight = true;
                 }
             }
+
             this.rocket.y = this.rocket.y + 10;
             if (this.rocket.y > window.height / 2 - 200) {
                 this._dropRocket = true;

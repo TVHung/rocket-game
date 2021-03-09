@@ -19,6 +19,11 @@ cc.Class({
             type: cc.AudioClip,
         },
 
+        backMenuSound: {
+            default: null,
+            type: cc.AudioClip,
+        },
+
         loop: true,
 
         soundVolume: {
@@ -27,6 +32,15 @@ cc.Class({
             slide: true,
             notify: function () {
                 this.setVolume();
+            },
+        },
+
+        soundVolumeMenu: {
+            default: 1,
+            range: [0, 1, 0.1],
+            slide: true,
+            notify: function () {
+                this.setVolumeMenu();
             },
         },
 
@@ -42,11 +56,19 @@ cc.Class({
 
     //Âm thanh nền
     playBackGroundSound() {
-        cc.audioEngine.stopAll();
+        // cc.audioEngine.stopAll();
         this._audioId = cc.audioEngine.play(
             this.backGroupSound,
             this.loop,
             this.soundVolume
+        );
+    },
+
+    playBackMenuSound() {
+        this._audioId = cc.audioEngine.play(
+            this.backMenuSound,
+            this.loop,
+            this.soundVolumeMenu
         );
     },
 
@@ -111,6 +133,12 @@ cc.Class({
                         loop
                     );
                     break;
+                case "loinoidau":
+                    this._EffectId = cc.audioEngine.playEffect(
+                        this.audioClipPool[9],
+                        loop
+                    );
+                    break;
                 default:
                     console.error("Command is invalid");
             }
@@ -127,6 +155,10 @@ cc.Class({
 
     setVolume() {
         cc.audioEngine.setVolume(this.soundVolume); //thiết lập âm lượng
+    },
+
+    setVolumeMenu() {
+        cc.audioEngine.setVolume(this.soundVolumeMenu); //thiết lập âm lượng
     },
 
     stopAll() {
