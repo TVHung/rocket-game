@@ -261,13 +261,28 @@ cc.Class({
         var stateReturn = false; //trang thai phep tinh co thoa man
         if (typeCal === 1) {
             //phep cong
-            while (stateReturn === false) {
-                num1 = Math.floor(Math.random() * (this._valueLimit + 1));
-                num2 = Math.floor(Math.random() * (this._valueLimit + 1));
-                result = num1 + num2;
-                if (result <= valueLimit) {
-                    stateReturn = true;
+            // while (stateReturn === false) {
+            //     num1 = Math.floor(Math.random() * (this._valueLimit + 1));
+            //     num2 = Math.floor(Math.random() * (this._valueLimit + 1));
+            //     result = num1 + num2;
+            //     if (result <= valueLimit) {
+            //         stateReturn = true;
+            //     }
+            // }
+            if (this._typeOption === 0) {
+                //xu ly cong voi
+                var posNum = Math.floor(Math.random() * 2); //random vi tri so _numValue xuat hien
+                if (posNum === 0) {
+                    num1 = this._numValue;
+                    num2 =
+                        Math.floor(Math.random() * (10 - this._numValue)) + 1;
+                } else {
+                    num1 =
+                        Math.floor(Math.random() * (10 - this._numValue)) + 1;
+                    num2 = this._numValue;
                 }
+            } else {
+                //xu ly cong trong pham vi
             }
         } else if (typeCal === 2) {
             //phep tru
@@ -573,6 +588,7 @@ cc.Class({
         this.node
             .getComponent("SoundManagerGameRocket")
             .playEffectSound("onClick", false);
+        this.node.getComponent("SoundManagerGameRocket").pauseMusic();
         cc.director.loadScene("GameInput");
     },
 
