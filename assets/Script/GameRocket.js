@@ -261,14 +261,6 @@ cc.Class({
         var stateReturn = false; //trang thai phep tinh co thoa man
         if (typeCal === 1) {
             //phep cong
-            // while (stateReturn === false) {
-            //     num1 = Math.floor(Math.random() * (this._valueLimit + 1));
-            //     num2 = Math.floor(Math.random() * (this._valueLimit + 1));
-            //     result = num1 + num2;
-            //     if (result <= valueLimit) {
-            //         stateReturn = true;
-            //     }
-            // }
             if (this._typeOption === 0) {
                 //xu ly cong voi
                 var posNum = Math.floor(Math.random() * 2); //random vi tri so _numValue xuat hien
@@ -281,19 +273,39 @@ cc.Class({
                         Math.floor(Math.random() * (10 - this._numValue)) + 1;
                     num2 = this._numValue;
                 }
+                result = num1 + num2;
             } else {
                 //xu ly cong trong pham vi
-            }
-        } else if (typeCal === 2) {
-            //phep tru
-            while (stateReturn === false) {
-                num1 = Math.floor(Math.random() * (this._valueLimit + 1));
-                num2 = Math.floor(Math.random() * (this._valueLimit + 1));
-                //kiem tra chia het
-                if (num1 >= num2) {
-                    result = num1 - num2;
+                this._valueLimit = this._numValue;
+                while (stateReturn === false) {
+                    num1 = Math.floor(Math.random() * (this._valueLimit + 1));
+                    num2 = Math.floor(Math.random() * (this._valueLimit + 1));
+                    result = num1 + num2;
                     if (result <= valueLimit) {
                         stateReturn = true;
+                    }
+                }
+            }
+            // console.log(num1 + num2);
+        } else if (typeCal === 2) {
+            //phep tru
+            if (this._typeOption === 0) {
+                //xu ly cong voi
+                num1 = this._numValue;
+                num2 = Math.floor(Math.random() * this._numValue) + 1;
+                result = num1 - num2;
+            } else {
+                //xu ly cong trong pham vi
+                this._valueLimit = this._numValue;
+                while (stateReturn === false) {
+                    num1 = Math.floor(Math.random() * (this._valueLimit + 1));
+                    num2 = Math.floor(Math.random() * (this._valueLimit + 1));
+                    //kiem tra chia het
+                    if (num1 >= num2) {
+                        result = num1 - num2;
+                        if (result <= valueLimit) {
+                            stateReturn = true;
+                        }
                     }
                 }
             }

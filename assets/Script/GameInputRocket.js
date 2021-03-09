@@ -269,15 +269,29 @@ cc.Class({
         this.onClickSound();
     },
     onClickOptionBangTruVoi() {
-        this.hideShowValueOptionCong(true, false);
+        this.hideShowValueOptionTru(true, false);
         this.onClickSound();
+        this._typeValue = 0;
     },
     onClickOptionTruTrongPhamVi() {
-        this.hideShowValueOptionCong(false, true);
+        this.hideShowValueOptionTru(false, true);
         this.onClickSound();
+        this._typeValue = 1;
     },
     //ham xu ly khi nhan vao gia tri choi
-    onClickValueTru() {},
+    onClickValueTru(event, customEventData) {
+        customEventData = parseInt(customEventData);
+        const dataTru = {
+            type: this._typeCaculator,
+            typeValue: this._typeValue,
+            num: customEventData,
+            option: this._typeValue, //kieu phep cong
+        };
+        window.localStorage.setItem("data", JSON.stringify(dataTru));
+        this.node.getComponent("SoundManagerGameRocket").pauseMusic();
+        cc.director.loadScene("GameRocket");
+        this.onClickSound();
+    },
 
     //---------------------------------------------------------------------------------------
     //xu ly logic nhan
