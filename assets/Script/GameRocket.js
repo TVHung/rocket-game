@@ -143,6 +143,8 @@ cc.Class({
         _khoangCach1Cau: 0,
         _heart: 10,
         _checkGiamHeart: 0, // kiem tra khi nao thi moi la luc giam tro giup = 0 thi moi chay
+        _typeQuestionSoSanh: 0, //loai cau hoi so sanh
+        _rightAnswer: true, // trả lời đúng hay sai
 
         //data
         _typeCaculator: 0,
@@ -256,97 +258,180 @@ cc.Class({
     generateRandomCalculations(valueLimit) {
         //hàm sinh ngẫu nhiên câu hỏi và câu trả lời
         //random phep tinh
+
+        console.log("Chon dung khong: " + this._rightAnswer);
         var typeCal = this._typeCaculator;
-        var num1, num2, result;
+        var num1,
+            num2,
+            result,
+            hchuc1,
+            hchuc2,
+            hchucSum,
+            hdonvi1,
+            hdonvi2,
+            hdonviSum;
         var stateReturn = false; //trang thai phep tinh co thoa man
-        if (typeCal === 1) {
-            //phep cong
-            if (this._typeOption === 0) {
-                //xu ly cong voi
-                var posNum = Math.floor(Math.random() * 2); //random vi tri so _numValue xuat hien
-                if (posNum === 0) {
-                    num1 = this._numValue;
-                    num2 =
-                        Math.floor(Math.random() * (10 - this._numValue)) + 1;
-                } else {
-                    num1 =
-                        Math.floor(Math.random() * (10 - this._numValue)) + 1;
-                    num2 = this._numValue;
-                }
-                result = num1 + num2;
-            } else {
-                //xu ly cong trong pham vi
-                this._valueLimit = this._numValue;
-                while (stateReturn === false) {
-                    num1 = Math.floor(Math.random() * (this._valueLimit + 1));
-                    num2 = Math.floor(Math.random() * (this._valueLimit + 1));
-                    result = num1 + num2;
-                    if (result <= valueLimit) {
-                        stateReturn = true;
+        if (this._rightAnswer === true) {
+            if (typeCal === 1) {
+                //phep cong
+                if (this._typeOption === 0) {
+                    //xu ly cong voi
+                    var posNum = Math.floor(Math.random() * 2); //random vi tri so _numValue xuat hien
+                    if (posNum === 0) {
+                        num1 = this._numValue;
+                        num2 =
+                            Math.floor(Math.random() * (10 - this._numValue)) +
+                            1;
+                    } else {
+                        num1 =
+                            Math.floor(Math.random() * (10 - this._numValue)) +
+                            1;
+                        num2 = this._numValue;
                     }
-                }
-            }
-            // console.log(num1 + num2);
-        } else if (typeCal === 2) {
-            //phep tru
-            if (this._typeOption === 0) {
-                //xu ly cong voi
-                num1 = this._numValue;
-                num2 = Math.floor(Math.random() * this._numValue) + 1;
-                result = num1 - num2;
-            } else {
-                //xu ly cong trong pham vi
-                this._valueLimit = this._numValue;
-                while (stateReturn === false) {
-                    num1 = Math.floor(Math.random() * (this._valueLimit + 1));
-                    num2 = Math.floor(Math.random() * (this._valueLimit + 1));
-                    //kiem tra chia het
-                    if (num1 >= num2) {
-                        result = num1 - num2;
-                        if (result <= valueLimit) {
+                    result = num1 + num2;
+                } else {
+                    //xu ly cong trong pham vi
+                    this._valueLimit = this._numValue;
+                    while (stateReturn === false) {
+                        num1 = Math.floor(
+                            Math.random() * (this._valueLimit + 1)
+                        );
+                        num2 = Math.floor(
+                            Math.random() * (this._valueLimit + 1)
+                        );
+
+                        hchuc1 = num1 / 10;
+                        hdonvi1 = num1 % 10;
+                        hchuc2 = num2 / 10;
+                        hdonvi2 = num2 % 10;
+                        hchucSum = hchuc1 + hchuc2;
+                        hdonviSum = hdonvi1 + hdonvi2;
+                        result = num1 + num2;
+                        if (
+                            result <= valueLimit &&
+                            hchucSum < 10 &&
+                            hdonviSum < 10
+                        ) {
                             stateReturn = true;
                         }
                     }
                 }
+                // console.log(num1 + num2);
+            } else if (typeCal === 2) {
+                //phep tru
+                if (this._typeOption === 0) {
+                    //xu ly cong voi
+                    num1 = this._numValue;
+                    num2 = Math.floor(Math.random() * this._numValue) + 1;
+                    result = num1 - num2;
+                } else {
+                    //xu ly cong trong pham vi
+                    this._valueLimit = this._numValue;
+                    while (stateReturn === false) {
+                        num1 = Math.floor(
+                            Math.random() * (this._valueLimit + 1)
+                        );
+                        num2 = Math.floor(
+                            Math.random() * (this._valueLimit + 1)
+                        );
+
+                        hchuc1 = num1 / 10;
+                        hdonvi1 = num1 % 10;
+                        hchuc2 = num2 / 10;
+                        hdonvi2 = num2 % 10;
+
+                        //kiem tra chia het
+                        if (
+                            num1 >= num2 &&
+                            hchuc1 >= hchuc2 &&
+                            hdonvi1 >= hdonvi2
+                        ) {
+                            result = num1 - num2;
+                            if (result <= valueLimit) {
+                                stateReturn = true;
+                            }
+                        }
+                    }
+                }
+            } else if (typeCal === 3) {
+                //phep nhan
+
+                //theo gioi han
+                // while (stateReturn === false) {
+                //     num1 = Math.floor(Math.random() * (this._valueLimit + 1));
+                //     num2 = Math.floor(Math.random() * (this._valueLimit + 1));
+                //     result = num1 * num2;
+                //     if (result <= valueLimit) {
+                //         stateReturn = true;
+                //     }
+                // }
+
+                //bang cuu chuong
+                num1 = this._numValue;
+                num2 = Math.floor(Math.random() * 10) + 1;
+                result = num1 * num2;
+            } else if (typeCal === 4) {
+                //phep chia
+                // while (stateReturn === false) {
+                //     num1 = Math.floor(Math.random() * (this._valueLimit + 1));
+                //     num2 = Math.floor(Math.random() * this._valueLimit) + 1;
+                //     //kiem tra chia het
+                //     if (num1 % num2 === 0) {
+                //         result = num1 / num2;
+                //         if (result <= valueLimit) {
+                //             stateReturn = true;
+                //         }
+                //     }
+                // }
+
+                num1 = (Math.floor(Math.random() * 10) + 1) * this._numValue;
+                num2 = this._numValue;
+                result = num1 / num2;
+            } else if (typeCal === 5) {
+                //so sanh
+                if (this._numValue > 3) {
+                    var posNum = Math.floor(Math.random() * 2); //random vi tri so _numValue xuat hien
+                } else {
+                    var posNum = Math.floor(Math.random() * 3); //random vi tri so _numValue xuat hien
+                }
+                this._typeQuestionSoSanh = posNum; //loai cau hoi so sanh
+                if (posNum === 0) {
+                    //dạng 1: điền số đúng với yêu cầu, cd 5 > ?
+                    num1 = Math.floor(Math.random() * this._numValue) + 1;
+                    num2 = Math.floor(Math.random() * this._numValue) + 1;
+                    //random vi tri so se là kết quả cần chọn
+                    let posRandom = Math.floor(Math.random() * 2);
+                    if (posRandom === 0) {
+                        result = num1;
+                    } else {
+                        result = num2;
+                    }
+                } else if (posNum === 1) {
+                    //dạng 2: điền dấu > < = , vd 5 ? 4
+                    num1 = Math.floor(Math.random() * this._numValue) + 1;
+                    num2 = Math.floor(Math.random() * this._numValue) + 1;
+                    if (num1 > num2) {
+                        result = 1;
+                    } else if (num1 < num2) {
+                        result = 2;
+                    } else {
+                        result = 3;
+                    }
+                } else {
+                    //dạng 3 điền số trong khoảng, vd: 6 < ? < 9, dạng này đối với phạm vi 3 thì không sử dụng
+                    while (stateReturn === false) {
+                        num1 = Math.floor(Math.random() * this._numValue) + 1;
+                        num2 = Math.floor(Math.random() * this._numValue) + 1;
+                        //kiem tra chia het
+                        if (num1 > num2) {
+                        } else if (num1 < num2) {
+                        } else {
+                        }
+                    }
+                }
+            } else {
+                //tong hop
             }
-        } else if (typeCal === 3) {
-            //phep nhan
-
-            //theo gioi han
-            // while (stateReturn === false) {
-            //     num1 = Math.floor(Math.random() * (this._valueLimit + 1));
-            //     num2 = Math.floor(Math.random() * (this._valueLimit + 1));
-            //     result = num1 * num2;
-            //     if (result <= valueLimit) {
-            //         stateReturn = true;
-            //     }
-            // }
-
-            //bang cuu chuong
-            num1 = this._numValue;
-            num2 = Math.floor(Math.random() * 10) + 1;
-            result = num1 * num2;
-        } else if (typeCal === 4) {
-            //phep chia
-            // while (stateReturn === false) {
-            //     num1 = Math.floor(Math.random() * (this._valueLimit + 1));
-            //     num2 = Math.floor(Math.random() * this._valueLimit) + 1;
-            //     //kiem tra chia het
-            //     if (num1 % num2 === 0) {
-            //         result = num1 / num2;
-            //         if (result <= valueLimit) {
-            //             stateReturn = true;
-            //         }
-            //     }
-            // }
-
-            num1 = (Math.floor(Math.random() * 10) + 1) * this._numValue;
-            num2 = this._numValue;
-            result = num1 / num2;
-        } else if (typeCal === 5) {
-            //so sanh
-        } else {
-            //tong hop
         }
 
         return [typeCal, num1, num2, result];
@@ -367,65 +452,173 @@ cc.Class({
     },
 
     CreateValueQuestion(valueLimit) {
-        var arr = this.generateRandomCalculations(valueLimit); //[0] loai phep tinh, [1] num1, [2] num2. [3] ket qua dung
-        var pheptinh = "";
-        if (arr[0] === 1) {
-            pheptinh = "+";
-        } else if (arr[0] === 2) {
-            pheptinh = "-";
-        } else if (arr[0] === 3) {
-            pheptinh = "x";
-        } else if (arr[0] === 4) {
-            pheptinh = ":";
-        } else if (arr[0] === 5) {
-            //xu ly chon phep tinh
-        } else {
-            //xu ly tong hop
-        }
-
-        //set cau hoi
-        this.questionText.string =
-            arr[1] + " " + pheptinh + " " + arr[2] + " = ?";
-
-        //set dap an
-        //random dap an dung
-        var trueResult = Math.floor(Math.random() * 3) + 1;
-        this._trueResult = trueResult;
-        //random 2 dam an nhung can check truong hop dap an trung nhau
-        var checkRandomResult = false;
-        var randomresult1, randomresult2;
-        while (checkRandomResult === false) {
-            if (arr[3] > 2) {
-                randomresult1 =
-                    Math.floor(Math.random() * arr[3]) + Math.floor(arr[3] / 2);
-                randomresult2 =
-                    Math.floor(Math.random() * arr[3]) + Math.floor(arr[3] / 2);
+        //neu van tra loi sai thi khong sua lai cau hoi
+        if (this._rightAnswer === true) {
+            var arr = this.generateRandomCalculations(valueLimit); //[0] loai phep tinh, [1] num1, [2] num2. [3] ket qua dung
+            var pheptinh = "";
+            var pheptinh2 = "";
+            var pheptinh3 = "";
+            if (arr[0] === 1) {
+                pheptinh = "+";
+            } else if (arr[0] === 2) {
+                pheptinh = "-";
+            } else if (arr[0] === 3) {
+                pheptinh = "x";
+            } else if (arr[0] === 4) {
+                pheptinh = ":";
+            } else if (arr[0] === 5) {
+                //xu ly chon phep tinh
+                //xu ly ben duoi
             } else {
-                randomresult1 = Math.floor(Math.random() * 10);
-                randomresult2 = Math.floor(Math.random() * 10);
+                //xu ly tong hop
             }
-            //kiem tra neu trung nhau
-            if (
-                arr[3] != randomresult1 &&
-                arr[3] != randomresult2 &&
-                randomresult1 != randomresult2
-            ) {
-                checkRandomResult = true;
-            }
-        }
 
-        if (trueResult === 1) {
-            this.resultTextA.string = "A. " + arr[3];
-            this.resultTextB.string = "B. " + randomresult1;
-            this.resultTextC.string = "C. " + randomresult2;
-        } else if (trueResult === 2) {
-            this.resultTextB.string = "B. " + arr[3];
-            this.resultTextA.string = "A. " + randomresult1;
-            this.resultTextC.string = "C. " + randomresult2;
-        } else {
-            this.resultTextC.string = "C. " + arr[3];
-            this.resultTextA.string = "A. " + randomresult1;
-            this.resultTextB.string = "B. " + randomresult2;
+            //set cau hoi
+            if (
+                this._typeCaculator === 1 ||
+                this._typeCaculator === 2 ||
+                this._typeCaculator === 3 ||
+                this._typeCaculator === 4
+            ) {
+                this.questionText.string =
+                    arr[1] + " " + pheptinh + " " + arr[2] + " = ?";
+            } else {
+                //xu ly doi voi dang 1
+                if (this._typeQuestionSoSanh === 0) {
+                    if (arr[1] === arr[2]) {
+                        //khi 2 so bang nhau
+                        pheptinh = "=";
+                        this.questionText.string =
+                            arr[1] + " " + pheptinh + " ?";
+                    } else if (arr[1] > arr[2]) {
+                        //neu so dau > so 2 thi se dua vao vi tri random de set so bi an
+                        pheptinh = ">";
+                        if (arr[1] === arr[3]) {
+                            this.questionText.string = "? " + pheptinh + arr[2];
+                        } else {
+                            this.questionText.string =
+                                arr[1] + " " + pheptinh + " ?";
+                        }
+                    } else {
+                        //neu so dau < so 2 thi se dua vao vi tri random de set so bi an
+                        pheptinh = "<";
+                        if (arr[1] === arr[3]) {
+                            this.questionText.string = "? " + pheptinh + arr[2];
+                        } else {
+                            this.questionText.string =
+                                arr[1] + " " + pheptinh + " ?";
+                        }
+                    }
+                } else if (this._typeQuestionSoSanh === 1) {
+                    this.questionText.string =
+                        arr[1] + " " + "?" + " " + arr[2];
+                    if (arr[1] > arr[2]) {
+                        pheptinh = ">";
+                        pheptinh2 = "<";
+                        pheptinh3 = "=";
+                    } else if (arr[1] < arr[2]) {
+                        pheptinh = "<";
+                        pheptinh2 = ">";
+                        pheptinh3 = "=";
+                    } else {
+                        pheptinh = "=";
+                        pheptinh2 = "<";
+                        pheptinh3 = ">";
+                    }
+                } else {
+                    this.questionText.string = "";
+                }
+            }
+
+            //set dap an
+            //random dap an dung
+            var trueResult = Math.floor(Math.random() * 3) + 1;
+            this._trueResult = trueResult;
+            //random 2 dam an nhung can check truong hop dap an trung nhau
+            var checkRandomResult = false;
+            var randomresult1, randomresult2;
+            if (this._typeCaculator != 5) {
+                while (checkRandomResult === false) {
+                    if (arr[3] > 2) {
+                        randomresult1 =
+                            Math.floor(Math.random() * arr[3]) +
+                            Math.floor(arr[3] / 2);
+                        randomresult2 =
+                            Math.floor(Math.random() * arr[3]) +
+                            Math.floor(arr[3] / 2);
+                    } else {
+                        randomresult1 = Math.floor(Math.random() * 10);
+                        randomresult2 = Math.floor(Math.random() * 10);
+                    }
+                    //kiem tra neu trung nhau
+                    if (
+                        arr[3] != randomresult1 &&
+                        arr[3] != randomresult2 &&
+                        randomresult1 != randomresult2
+                    ) {
+                        checkRandomResult = true;
+                    }
+                }
+
+                if (trueResult === 1) {
+                    this.resultTextA.string = "A. " + arr[3];
+                    this.resultTextB.string = "B. " + randomresult1;
+                    this.resultTextC.string = "C. " + randomresult2;
+                } else if (trueResult === 2) {
+                    this.resultTextB.string = "B. " + arr[3];
+                    this.resultTextA.string = "A. " + randomresult1;
+                    this.resultTextC.string = "C. " + randomresult2;
+                } else {
+                    this.resultTextC.string = "C. " + arr[3];
+                    this.resultTextA.string = "A. " + randomresult1;
+                    this.resultTextB.string = "B. " + randomresult2;
+                }
+            } else {
+                //doi voi truong hop so sanh se xu ly cau tra loi se duoc in ra
+                if (this._typeQuestionSoSanh === 0) {
+                    while (checkRandomResult === false) {
+                        randomresult1 = 1;
+                        randomresult2 = 2;
+                        //kiem tra neu trung nhau
+                        if (
+                            arr[3] != randomresult1 &&
+                            arr[3] != randomresult2 &&
+                            randomresult1 != randomresult2
+                        ) {
+                            checkRandomResult = true;
+                        }
+                    }
+
+                    if (trueResult === 1) {
+                        this.resultTextA.string = "A. " + arr[3];
+                        this.resultTextB.string = "B. " + randomresult1;
+                        this.resultTextC.string = "C. " + randomresult2;
+                    } else if (trueResult === 2) {
+                        this.resultTextB.string = "B. " + arr[3];
+                        this.resultTextA.string = "A. " + randomresult1;
+                        this.resultTextC.string = "C. " + randomresult2;
+                    } else {
+                        this.resultTextC.string = "C. " + arr[3];
+                        this.resultTextA.string = "A. " + randomresult1;
+                        this.resultTextB.string = "B. " + randomresult2;
+                    }
+                } else if (this._typeQuestionSoSanh === 1) {
+                    if (trueResult === 1) {
+                        this.resultTextA.string = "A. " + pheptinh;
+                        this.resultTextB.string = "B. " + pheptinh2;
+                        this.resultTextC.string = "C. " + pheptinh3;
+                    } else if (trueResult === 2) {
+                        this.resultTextB.string = "B. " + pheptinh;
+                        this.resultTextA.string = "A. " + pheptinh2;
+                        this.resultTextC.string = "C. " + pheptinh3;
+                    } else {
+                        this.resultTextC.string = "C. " + pheptinh;
+                        this.resultTextA.string = "A. " + pheptinh2;
+                        this.resultTextB.string = "B. " + pheptinh3;
+                    }
+                } else {
+                }
+            }
         }
     },
 
@@ -433,11 +626,11 @@ cc.Class({
     repeatBackground() {
         this.background1.node.y -= this._speedBackground;
         this.background2.node.y -= this._speedBackground;
-        if (this.background1.node.y <= -this._backgroundHeight) {
-            this.background1.node.setPosition(0, window.height);
+        if (this.background1.node.y >= -20 && this.background1.node.y <= 0) {
+            this.background2.node.setPosition(0, window.height + 190);
         }
-        if (this.background2.node.y <= -this._backgroundHeight) {
-            this.background2.node.setPosition(0, window.height);
+        if (this.background2.node.y >= -20 && this.background2.node.y <= 0) {
+            this.background1.node.setPosition(0, window.height + 190);
         }
     },
 
@@ -527,8 +720,8 @@ cc.Class({
 
     //on click button
     handleCheckResult(event, customEventData) {
-        this._choiced++;
-        customEventData = parseInt(customEventData);
+        this._choiced++; //khong cho an nhieu lan
+        customEventData = parseInt(customEventData); //dap an do nguoi choi chon
         if (this._choiced === 1) {
             if (
                 customEventData == this._trueResult &&
@@ -563,9 +756,8 @@ cc.Class({
                 }
                 //xử lý rocket sẽ bay lên hay gì đó
                 this._dropRocket = false; //khong roi nua ma bay len
-
+                this._rightAnswer = true;
                 //xu ly nhap nhay khi chon dung
-
                 this.effectOnClickButton(customEventData, true, 1);
             } else {
                 this.node
@@ -574,10 +766,13 @@ cc.Class({
 
                 //xu ly nhap nhay khi chon sai
                 this.effectOnClickButton(customEventData, false, 1);
+                this._rightAnswer = false;
             }
+
             setTimeout(() => {
                 this.questionBox.active = false;
             }, 600);
+
             if (
                 this._gameStart === true &&
                 this._numCurrentQuestion < this.numOfQuestion
@@ -696,7 +891,7 @@ cc.Class({
             this.tableResult
                 .getChildByName("ThanhTuu")
                 .getComponent(cc.Label).string =
-                "Thành Tích: " + this._indexPlanet + "/10";
+                "Thành Tích: " + (this._indexPlanet + 1) + "/10";
             this.tableResult.getComponent(cc.Animation).play();
         }, 1000);
     },

@@ -121,6 +121,8 @@ cc.Class({
             type: cc.Node,
         },
 
+        //---------------------------------------
+
         valueLabel: {
             default: null,
             type: cc.Label,
@@ -373,7 +375,19 @@ cc.Class({
         this.onClickSound();
     },
     //ham xu ly khi nhan vao gia tri choi
-    onClickValueSoSanh() {},
+    onClickValueSoSanh(event, customEventData) {
+        customEventData = parseInt(customEventData);
+        const dataSoSanh = {
+            type: this._typeCaculator,
+            num: customEventData,
+            option: this._typeValue,
+        };
+
+        window.localStorage.setItem("data", JSON.stringify(dataSoSanh));
+        this.node.getComponent("SoundManagerGameRocket").pauseMusic();
+        cc.director.loadScene("GameRocket");
+        this.onClickSound();
+    },
 
     //---------------------------------------------------------------------------------------
     //xu ly tong hop
@@ -391,7 +405,19 @@ cc.Class({
         this.onClickSound();
     },
     //ham xu ly khi nhan vao gia tri choi
-    onClickValueTongHop() {},
+    onClickValueTongHop(event, customEventData) {
+        customEventData = parseInt(customEventData);
+        const dataTongHop = {
+            type: this._typeCaculator,
+            num: customEventData,
+            option: this._typeValue,
+        };
+
+        window.localStorage.setItem("data", JSON.stringify(dataTongHop));
+        this.node.getComponent("SoundManagerGameRocket").pauseMusic();
+        // cc.director.loadScene("GameRocket");
+        this.onClickSound();
+    },
 
     //---------------------------------------------------------------------------------------
 

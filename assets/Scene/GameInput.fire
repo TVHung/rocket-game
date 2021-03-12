@@ -189,7 +189,7 @@
       "array": [
         0,
         0,
-        795.0113206741147,
+        808.8677271346658,
         0,
         0,
         0,
@@ -3703,7 +3703,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 199.23,
+      "width": 202.04,
       "height": 44.1
     },
     "_anchorPoint": {
@@ -3755,8 +3755,8 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_string": "Chọn option",
-    "_N$string": "Chọn option",
+    "_string": "Chọn chế độ",
+    "_N$string": "Chọn chế độ",
     "_fontSize": 35,
     "_lineHeight": 35,
     "_enableWrapText": true,
@@ -25055,7 +25055,7 @@
     },
     "component": "",
     "_componentId": "e83a2elItZCwaalzkhy9O45",
-    "handler": "onClickOptionBangCuuChuongNhan",
+    "handler": "onClickValueSoSanh",
     "customEventData": "100"
   },
   {

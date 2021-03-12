@@ -177,7 +177,7 @@
       "array": [
         0,
         0,
-        539.068595648827,
+        808.8677271346658,
         0,
         0,
         0,
@@ -8130,6 +8130,8 @@
     "_khoangCach1Cau": 0,
     "_heart": 3,
     "_checkGiamHeart": 0,
+    "_typeQuestionSoSanh": 0,
+    "_rightAnswer": true,
     "_typeCaculator": 0,
     "_numValue": 0,
     "_typeOption": null,
