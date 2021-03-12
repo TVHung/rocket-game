@@ -396,15 +396,16 @@ cc.Class({
                 }
                 this._typeQuestionSoSanh = posNum; //loai cau hoi so sanh
                 if (posNum === 0) {
-                    //dạng 1: điền số đúng với yêu cầu, cd 5 > ?
-                    num1 = Math.floor(Math.random() * this._numValue) + 1;
+                    //dạng 1: Chọn đáp án đúng hoặc sai, 5 > 3??
+                    num1 = Math.floor(Math.random() * this._numValue) + 1; //chon bua 2 so bat ki trong khoang gia tri
                     num2 = Math.floor(Math.random() * this._numValue) + 1;
-                    //random vi tri so se là kết quả cần chọn
-                    let posRandom = Math.floor(Math.random() * 2);
-                    if (posRandom === 0) {
-                        result = num1;
+                    //result de xac dinh dap an dung cho phep tinh
+                    if (num1 > num2) {
+                        result = 0;
+                    } else if (num2 > num1) {
+                        result = 1;
                     } else {
-                        result = num2;
+                        result = 2;
                     }
                 } else if (posNum === 1) {
                     //dạng 2: điền dấu > < = , vd 5 ? 4
@@ -423,9 +424,23 @@ cc.Class({
                         num1 = Math.floor(Math.random() * this._numValue) + 1;
                         num2 = Math.floor(Math.random() * this._numValue) + 1;
                         //kiem tra chia het
-                        if (num1 > num2) {
-                        } else if (num1 < num2) {
+                        var max, min;
+                        if (num1 >= num2 + 2) {
+                            max = num1 - 1;
+                            min = num2 + 1;
+                            result =
+                                Math.floor(Math.random() * (max - min + 1)) +
+                                min; //random trong khoang
+                            stateReturn = true;
+                        } else if (num1 + 2 <= num2) {
+                            max = num2 - 1;
+                            min = num1 + 1;
+                            result =
+                                Math.floor(Math.random() * (max - min + 1)) +
+                                min; //random trong khoang
+                            stateReturn = true;
                         } else {
+                            stateReturn = false;
                         }
                     }
                 }
@@ -455,6 +470,7 @@ cc.Class({
         //neu van tra loi sai thi khong sua lai cau hoi
         if (this._rightAnswer === true) {
             var arr = this.generateRandomCalculations(valueLimit); //[0] loai phep tinh, [1] num1, [2] num2. [3] ket qua dung
+            var randomDau;
             var pheptinh = "";
             var pheptinh2 = "";
             var pheptinh3 = "";
@@ -485,30 +501,16 @@ cc.Class({
             } else {
                 //xu ly doi voi dang 1
                 if (this._typeQuestionSoSanh === 0) {
-                    if (arr[1] === arr[2]) {
-                        //khi 2 so bang nhau
-                        pheptinh = "=";
-                        this.questionText.string =
-                            arr[1] + " " + pheptinh + " ?";
-                    } else if (arr[1] > arr[2]) {
-                        //neu so dau > so 2 thi se dua vao vi tri random de set so bi an
+                    randomDau = Math.floor(Math.random() * 3); //dap an chay tu 0 den 2
+                    if (randomDau === 0) {
                         pheptinh = ">";
-                        if (arr[1] === arr[3]) {
-                            this.questionText.string = "? " + pheptinh + arr[2];
-                        } else {
-                            this.questionText.string =
-                                arr[1] + " " + pheptinh + " ?";
-                        }
-                    } else {
-                        //neu so dau < so 2 thi se dua vao vi tri random de set so bi an
+                    } else if (randomDau === 1) {
                         pheptinh = "<";
-                        if (arr[1] === arr[3]) {
-                            this.questionText.string = "? " + pheptinh + arr[2];
-                        } else {
-                            this.questionText.string =
-                                arr[1] + " " + pheptinh + " ?";
-                        }
+                    } else {
+                        pheptinh = "=";
                     }
+                    this.questionText.string =
+                        arr[1] + " " + pheptinh + " " + arr[2] + " ?";
                 } else if (this._typeQuestionSoSanh === 1) {
                     this.questionText.string =
                         arr[1] + " " + "?" + " " + arr[2];
@@ -526,7 +528,13 @@ cc.Class({
                         pheptinh3 = ">";
                     }
                 } else {
-                    this.questionText.string = "";
+                    if (arr[1] > arr[2]) {
+                        this.questionText.string =
+                            arr[1] + " > " + "?" + " > " + arr[2];
+                    } else {
+                        this.questionText.string =
+                            arr[1] + " < " + "?" + " < " + arr[2];
+                    }
                 }
             }
 
@@ -559,7 +567,7 @@ cc.Class({
                         checkRandomResult = true;
                     }
                 }
-
+                this.BtnC.node.active = true;
                 if (trueResult === 1) {
                     this.resultTextA.string = "A. " + arr[3];
                     this.resultTextB.string = "B. " + randomresult1;
@@ -576,33 +584,16 @@ cc.Class({
             } else {
                 //doi voi truong hop so sanh se xu ly cau tra loi se duoc in ra
                 if (this._typeQuestionSoSanh === 0) {
-                    while (checkRandomResult === false) {
-                        randomresult1 = 1;
-                        randomresult2 = 2;
-                        //kiem tra neu trung nhau
-                        if (
-                            arr[3] != randomresult1 &&
-                            arr[3] != randomresult2 &&
-                            randomresult1 != randomresult2
-                        ) {
-                            checkRandomResult = true;
-                        }
-                    }
-
-                    if (trueResult === 1) {
-                        this.resultTextA.string = "A. " + arr[3];
-                        this.resultTextB.string = "B. " + randomresult1;
-                        this.resultTextC.string = "C. " + randomresult2;
-                    } else if (trueResult === 2) {
-                        this.resultTextB.string = "B. " + arr[3];
-                        this.resultTextA.string = "A. " + randomresult1;
-                        this.resultTextC.string = "C. " + randomresult2;
+                    if (randomDau === arr[3]) {
+                        this._trueResult = 1;
                     } else {
-                        this.resultTextC.string = "C. " + arr[3];
-                        this.resultTextA.string = "A. " + randomresult1;
-                        this.resultTextB.string = "B. " + randomresult2;
+                        this._trueResult = 2;
                     }
+                    this.BtnC.node.active = false;
+                    this.resultTextA.string = "A. Đúng";
+                    this.resultTextB.string = "B. Sai";
                 } else if (this._typeQuestionSoSanh === 1) {
+                    this.BtnC.node.active = true;
                     if (trueResult === 1) {
                         this.resultTextA.string = "A. " + pheptinh;
                         this.resultTextB.string = "B. " + pheptinh2;
@@ -617,6 +608,39 @@ cc.Class({
                         this.resultTextB.string = "B. " + pheptinh3;
                     }
                 } else {
+                    while (checkRandomResult === false) {
+                        if (arr[1] > arr[2]) {
+                            randomresult1 =
+                                Math.floor(Math.random() * 10) + arr[1];
+                            randomresult2 = Math.floor(Math.random() * arr[2]);
+                        } else {
+                            randomresult1 = Math.floor(Math.random() * arr[1]);
+                            randomresult2 =
+                                Math.floor(Math.random() * 10) + arr[2];
+                        }
+                        //kiem tra neu trung nhau
+                        if (
+                            arr[3] != randomresult1 &&
+                            arr[3] != randomresult2 &&
+                            randomresult1 != randomresult2
+                        ) {
+                            checkRandomResult = true;
+                        }
+                    }
+                    this.BtnC.node.active = true;
+                    if (trueResult === 1) {
+                        this.resultTextA.string = "A. " + arr[3];
+                        this.resultTextB.string = "B. " + randomresult1;
+                        this.resultTextC.string = "C. " + randomresult2;
+                    } else if (trueResult === 2) {
+                        this.resultTextB.string = "B. " + arr[3];
+                        this.resultTextA.string = "A. " + randomresult1;
+                        this.resultTextC.string = "C. " + randomresult2;
+                    } else {
+                        this.resultTextC.string = "C. " + arr[3];
+                        this.resultTextA.string = "A. " + randomresult1;
+                        this.resultTextB.string = "B. " + randomresult2;
+                    }
                 }
             }
         }
@@ -767,6 +791,10 @@ cc.Class({
                 //xu ly nhap nhay khi chon sai
                 this.effectOnClickButton(customEventData, false, 1);
                 this._rightAnswer = false;
+                if (this._heart > 0) {
+                    this._heart--;
+                    this.heartTimesLabel.string = this._heart + "";
+                }
             }
 
             setTimeout(() => {
